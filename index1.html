@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eng/Zyad - Personal Website</title>
+    <!-- استدعاء أيقونات FontAwesome لوسائل التواصل والقائمة -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* تعريف متغيرات الألوان للوضع الليلي والنهاري */
+        :root {
+            --bg-color: #0b0b0b;
+            --text-color: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.04);
+            --shadow: rgba(0, 0, 0, 0.8);
+            --border-color: rgba(0, 255, 102, 0.2);
+            --trail-color: #00ff66;
+            --accent-color: #00ff66;
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f8f9fa;
+            --text-color: #1a1a1a;
+            --card-bg: rgba(0, 0, 0, 0.04);
+            --shadow: rgba(0, 0, 0, 0.08);
+            --border-color: rgba(0, 123, 255, 0.2);
+            --trail-color: #007bff;
+            --accent-color: #007bff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.4s, color 0.4s, border-color 0.4s;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            position: relative;
+            padding: 100px 0 40px 0;
+            overflow-x: hidden;
+        }
+
+        /* شاشة هطول أكواد الهاكر الكلاسيكية (Matrix Rain) */
+        #intro-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        #matrix-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* صندوق نص الهاكر في منتصف الشاشة */
+        .intro-text-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #00ff66;
+            padding: 30px;
+            border-radius: 15px;
+            color: #00ff66;
+            font-family: 'Courier New', Courier, monospace;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 255, 102, 0.4);
+            z-index: 10000;
+            width: 90%;
+            max-width: 450px;
+            direction: ltr;
+        }
+
+        .intro-text-box h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: blink 1s infinite;
+        }
+
+        #hacker-status {
+            font-size: 1rem;
+            min-height: 24px;
+            color: #ffffff;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* محتوى الموقع الأساسي */
+        #main-content {
+            opacity: 0;
+            transition: opacity 1.2s ease-in-out;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* Canvas لتأثير خطوط الحركة النيون وراء الماوس */
+        #trail-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* الإيموجيات المتحركة في الخلفية */
+        .background-emojis {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .emoji {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.12;
+            animation: float 8s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(110vh) rotate(0deg); }
+            100% { transform: translateY(-10vh) rotate(360deg); }
+        }
+
+        /* شريط التحكم العلوي */
+        .top-bar {
+            position: fixed;
+            top: 20px;
+            width: 90%;
+            max-width: 420px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            background: var(--card-bg);
+            padding: 12px 24px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-control {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            transition: background-color 0.2s, transform 0.2s, color 0.2s;
+        }
+        
+        .btn-control:hover {
+            background-color: var(--border-color);
+            color: var(--accent-color);
+            transform: scale(1.05);
+        }
+
+        /* الكارت الرئيسي في المنتصف */
+        .profile-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 40px 30px;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 0 10px 45px var(--shadow);
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        /* منطقة الصورة القابلة للضغط للتكبير */
+        .profile-img-clickable {
+            display: inline-block;
+            margin-bottom: 20px;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .profile-img-clickable:hover {
+            transform: scale(1.05);
+        }
+
+        .profile-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent-color);
+            box-shadow: 0 4px 20px var(--shadow);
+            display: block;
+        }
+
+        /* زر صغير عائم فوق الصورة لتبديلها بضغطة واحدة */
+        .switch-img-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--accent-color);
+            color: #000;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+            z-index: 5;
+        }
+        .switch-img-btn:hover {
+            transform: scale(1.15);
+        }
+
+        .profile-name {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--text-color);
+            min-height: 35px;
+        }
+
+        .profile-bio {
+            font-size: 0.95rem;
+            opacity: 0.8;
+            line-height: 1.5;
+            min-height: 50px;
+        }
+
+        /* تأثير مؤشر الكتابة التلقائية */
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            background-color: var(--accent-color);
+            margin-left: 2px;
+            animation: blinkCursor 0.8s infinite;
+        }
+
+        @keyframes blinkCursor {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* المربعات الصغيرة (المستطيلات) */
+        .small-message-box {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 15px 20px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 6px 20px var(--shadow);
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid var(--border-color);
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-color);
+            letter-spacing: 0.5px;
+        }
+
+        /* قائمة الروابط المنسدلة (الهامبرغر) */
+        .social-links {
+            max-height: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            transition: max-height 0.5s ease-in-out, margin-top 0.3s;
+        }
+
+        .social-links.open {
+            max-height: 400px;
+            margin-top: 25px;
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 16px;
+            text-decoration: none;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .social-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px var(--shadow);
+        }
+
+        .facebook { background-color: #1877f2; }
+        .whatsapp { background-color: #25d366; }
+        .instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+        .tiktok { background: #000000; border: 1px solid rgba(255,255,255,0.2); }
+        [data-theme="light"] .tiktok { background: #000000; color: #fff; }
+
+        /* تراكب الصورة المنبثقة المكبرة (Lightbox) */
+        .image-viewer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .image-viewer-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .expanded-img {
+            max-width: 85%;
+            max-height: 75vh;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            border: 2px solid var(--accent-color);
+            transform: scale(0.8);
+            transition: transform 0.4s ease;
+        }
+
+        .image-viewer-overlay.active .expanded-img {
+            transform: scale(1);
+        }
+
+        /* زر الإغلاق لـ عرض الصورة */
+        .close-viewer-btn {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: rgba(255,255,255,0.1);
+            color: #ffffff;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .close-viewer-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. شاشة دخلة الهاكر (Matrix Digital Rain) -->
+    <div id="intro-screen">
+        <canvas id="matrix-canvas"></canvas>
+        <div class="intro-text-box">
+            <h2>System Override</h2>
+            <div id="hacker-status">Connecting to secure core...</div>
+        </div>
+    </div>
+
+    <!-- كود الـ Canvas لرسم خطوط تتبع الحركة للماوس النيون -->
+    <canvas id="trail-canvas"></canvas>
+
+    <!-- 2. محتوى الموقع الأساسي -->
+    <div id="main-content">
+        <!-- الخلفية المتحركة للإيموجيات -->
+        <div class="background-emojis" id="emojiContainer"></div>
+
+        <!-- شريط التحكم العلوي -->
+        <div class="top-bar">
+            <!-- زر تشغيل/إيقاف الموسيقى -->
+            <button class="btn-control" id="musicToggle" title="تشغيل/إيقاف الأغنية">
+                <i class="fas fa-music"></i>
+            </button>
+
+            <!-- زر تغيير الأغنية للانتقال للأغنية التالية -->
+            <button class="btn-control" id="nextMusicBtn" title="تغيير الأغنية">
+                <i class="fas fa-forward"></i>
+            </button>
+            
+            <!-- زر القائمة ثلاث شرط (الهامبرغر) للروابط -->
+            <button class="btn-control" id="menuToggle" title="عرض الحسابات">
+                <i class="fas fa-bars" id="menuIcon"></i>
+            </button>
+
+            <!-- زر تغيير الوضع (ليلي/نهاري) -->
+            <button class="btn-control" id="themeToggle" title="تغيير المظهر">
+                <i class="fas fa-moon" id="themeIcon"></i>
+            </button>
+        </div>
+
+        <!-- الكارت الرئيسي في المنتصف -->
+        <div class="profile-container">
+            <!-- جعل الصورة تفتح كمصغرة منبثقة مكبرة -->
+            <div class="profile-img-clickable" id="openViewer" title="اضغط لتكبير الصورة">
+                <img src="" alt="Eng/Zyad" class="profile-img dynamic-img" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=zyad'">
+                <!-- زر تبديل الصورة مباشرة -->
+                <button class="switch-img-btn" id="nextImgBtn" title="تغيير الصورة">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+            
+            <!-- تم إعداد المعرفات لتفعيل تأثير الكتابة التلقائية -->
+            <h2 class="profile-name" id="typing-name"></h2>
+            <p class="profile-bio" id="typing-bio"></p>
+
+            <!-- روابط الحسابات (مخفية وتظهر عند الضغط على الـ 3 شرط) -->
+            <div class="social-links" id="socialLinks">
+                <a href="https://www.facebook.com/share/18rbbK3nrT/" target="_blank" class="social-btn facebook">
+                    <i class="fab fa-facebook-f"></i> فيسبوك
+                </a>
+                <a href="https://www.instagram.com/zizo_el_sheikh?igsh=MThzMnhlZHllZTlrcg==&igsi=MThzMnhlZHllZTlrcg==" target="_blank" class="social-btn instagram">
+                    <i class="fab fa-instagram"></i> انستغرام
+                </a>
+                <a href="https://wa.me/qr/UTFP4MQV6NP7N1" target="_blank" class="social-btn whatsapp">
+                    <i class="fab fa-whatsapp"></i> واتساب
+                </a>
+                <a href="https://www.tiktok.com/@eng_zyad_7?_r=1&_t=ZS-990IAIhs0Fc" target="_blank" class="social-btn tiktok">
+                    <i class="fab fa-tiktok"></i> تيك توك
+                </a>
+            </div>
+        </div>
+
+        <!-- المربع الصغير الأول -->
+        <div class="small-message-box">
+            أهلاً بك في مساحتي الخاصة حبي ❤️✨
+        </div>
+
+        <!-- المربع الصغير الثالث المضاف حديثاً في الأسفل -->
+        <div class="small-message-box">
+            دوس علي الـ <i class="fas fa-bars" style="margin: 0 4px; color: var(--accent-color);"></i> لعرض منصات التواصل
+        </div>
+    </div>
+
+    <!-- 3. نافذة العرض المنبثقة للصورة المكبرة (تظهر في نفس الصفحة) -->
+    <div class="image-viewer-overlay" id="imageViewer">
+        <button class="close-viewer-btn" id="closeViewer"><i class="fas fa-times"></i></button>
+        <img src="" alt="Eng/Zyad Expanded" class="expanded-img dynamic-img" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=zyad'">
+    </div>
+
+    <!-- ملف الموسيقى -->
+    <audio id="bgMusic" loop></audio>
+
+    <script>
+        // ========================================================
+        // 🛠️ لوحة التحكم للصور والأغاني
+        // ========================================================
+        const CONFIG = {
+            images: [
+                "my-avatar1.jpg", 
+                "my-avatar2.jpg"  
+            ],
+            audioFiles: [
+                "my-music1.mp3",  
+                "my-music2.mp3"   
+            ]
+        };
+        // ========================================================
+
+        let currentImgIndex = 0;
+        let currentAudioIndex = 0;
+
+        const bgMusic = document.getElementById('bgMusic');
+
+        function updateImages() {
+            document.querySelectorAll('.dynamic-img').forEach(img => {
+                img.src = CONFIG.images[currentImgIndex];
+            });
+        }
+
+        function updateAudio() {
+            const wasPlaying = !bgMusic.paused;
+            bgMusic.src = CONFIG.audioFiles[currentAudioIndex];
+            if (wasPlaying) {
+                bgMusic.play().catch(e => console.log(e));
+            }
+        }
+
+        // تطبيق الإعدادات عند فتح الصفحة
+        document.addEventListener("DOMContentLoaded", () => {
+            updateImages();
+            updateAudio();
+        });
+
+        // زر تغيير الصورة
+        document.getElementById('nextImgBtn').addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            currentImgIndex = (currentImgIndex + 1) % CONFIG.images.length;
+            updateImages();
+        });
+
+        // زر تغيير الأغنية
+        document.getElementById('nextMusicBtn').addEventListener('click', () => {
+            currentAudioIndex = (currentAudioIndex + 1) % CONFIG.audioFiles.length;
+            updateAudio();
+            const musicToggle = document.getElementById('musicToggle');
+            musicToggle.innerHTML = '<i class="fas fa-pause"></i>';
+            musicToggle.style.opacity = '1';
+            isPlaying = true;
+            bgMusic.play();
+        });
+
+        // --- محاكي الصوت السيبراني عند الضغط الفوري ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playClickSound() {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.04);
+            gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.04);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.04);
+        }
+
+        function attachClickSounds() {
+            const targets = document.querySelectorAll('.btn-control, .social-btn, #openViewer, .switch-img-btn');
+            targets.forEach(t => t.addEventListener('click', playClickSound));
+        }
+
+        // --- [1] تأثير الهاكر المطور (Matrix Rain) وشاشة النص المنتصف ---
+        const matrixCanvas = document.getElementById('matrix-canvas');
+        const mCtx = matrixCanvas.getContext('2d');
+
+        function resizeMatrix() {
+            matrixCanvas.width = window.innerWidth;
+            matrixCanvas.height = window.innerHeight;
+        }
+        resizeMatrix();
+        window.addEventListener('resize', resizeMatrix);
+
+        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*{}[];:<>?/+-=";
+        const fontSize = 16;
+        const columns = matrixCanvas.width / fontSize;
+        const rainDrops = Array(Math.floor(columns)).fill(1);
+
+        function drawMatrix() {
+            mCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            mCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+
+            mCtx.fillStyle = '#00ff66';
+            mCtx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < rainDrops.length; i++) {
+                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                mCtx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+
+                if (rainDrops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) {
+                    rainDrops[i] = 0;
+                }
+                rainDrops[i]++;
+            }
+        }
+        const matrixInterval = setInterval(drawMatrix, 30);
+
+        const statusEl = document.getElementById('hacker-status');
+        const statusTexts = [
+            "Bypassing firewall...",
+            "Decrypting secure protocols...",
+            "Loading identity core: Eng/Zyad...",
+            "Access Granted!"
+        ];
+        let textIdx = 0;
+        function updateStatus() {
+            if (textIdx < statusTexts.length) {
+                statusEl.innerText = statusTexts[textIdx];
+                textIdx++;
+                setTimeout(updateStatus, 1000);
+            } else {
+                clearInterval(matrixInterval);
+                const introScreen = document.getElementById('intro-screen');
+                const mainContent = document.getElementById('main-content');
+                introScreen.style.transition = "opacity 0.8s ease";
+                introScreen.style.opacity = "0";
+                setTimeout(() => {
+                    introScreen.style.display = "none";
+                    mainContent.style.opacity = "1";
+                    mainContent.style.pointerEvents = "auto";
+                    startTypingEffect();
+                }, 800);
+            }
+        }
+        setTimeout(updateStatus, 800);
+
+
+        // --- [2] تأثير خطوط نيون الجسيمات الممتدة المتوهجة للماوس ---
+        const trailCanvas = document.getElementById('trail-canvas');
+        const tCtx = trailCanvas.getContext('2d');
+        let particles = [];
+
+        function resizeTrail() {
+            trailCanvas.width = window.innerWidth;
+            trailCanvas.height = window.innerHeight;
+        }
+        resizeTrail();
+        window.addEventListener('resize', resizeTrail);
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 3 + 2;
+                this.speedX = Math.random() * 2 - 1;
+                this.speedY = Math.random() * 2 - 1;
+                this.color = getComputedStyle(document.documentElement).getPropertyValue('--trail-color').trim();
+                this.alpha = 1;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.alpha -= 0.02;
+                if (this.size > 0.1) this.size -= 0.05;
+            }
+            draw() {
+                tCtx.save();
+                tCtx.globalAlpha = this.alpha;
+                tCtx.shadowBlur = 12;
+                tCtx.shadowColor = this.color;
+                tCtx.fillStyle = this.color;
+                tCtx.beginPath();
+                tCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                tCtx.fill();
+                tCtx.restore();
+            }
+        }
+
+        function connectParticles() {
+            let color = getComputedStyle(document.documentElement).getPropertyValue('--trail-color').trim();
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i; j < particles.length; j++) {
+                    let dx = particles[i].x - particles[j].x;
+                    let dy = particles[i].y - particles[j].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 60) {
+                        tCtx.save();
+                        tCtx.globalAlpha = particles[i].alpha * 0.3;
+                        tCtx.strokeStyle = color;
+                        tCtx.lineWidth = 1;
+                        tCtx.beginPath();
+                        tCtx.moveTo(particles[i].x, particles[i].y);
+                        tCtx.lineTo(particles[j].x, particles[j].y);
+                        tCtx.stroke();
+                        tCtx.restore();
+                    }
+                }
+            }
+        }
+
+        function handleParticles() {
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                if (particles[i].alpha <= 0) {
+                    particles.splice(i, 1);
+                    i--;
+                }
+            }
+            connectParticles();
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            for(let i=0; i<3; i++) {
+                particles.push(new Particle(e.clientX, e.clientY));
+            }
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if(e.touches.length > 0) {
+                for(let i=0; i<2; i++) {
+                    particles.push(new Particle(e.touches[0].clientX, e.touches[0].clientY));
+                }
+            }
+        });
+
+        function animateParticles() {
+            tCtx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
+            handleParticles();
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+
+        // --- [3] توليد إيموشنات البرمجة في الخلفية ---
+        const emojis = ['💻', '🚀', '⚡', '🧠', '⚙️', '🌐', '👾', '🔥', '📁'];
+        const container = document.getElementById('emojiContainer');
+        const emojiCount = 20;
+
+        for (let i = 0; i < emojiCount; i++) {
+            const emojiEl = document.createElement('div');
+            emojiEl.classList.add('emoji');
+            emojiEl.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            
+            emojiEl.style.left = Math.random() * 100 + 'vw';
+            emojiEl.style.animationDelay = Math.random() * 8 + 's';
+            emojiEl.style.animationDuration = (Math.random() * 5 + 6) + 's';
+            
+            container.appendChild(emojiEl);
+        }
+
+
+        // --- [4] تأثير الكتابة التلقائية ---
+        const nameText = "Eng/Zyad 👋";
+        const bioText = "مرحباً بك في فضائي الخاص 💻✨\nمهندس برمجيات";
+        
+        function typeWriter(elementId, text, speed, callback) {
+            let i = 0;
+            const element = document.getElementById(elementId);
+            element.innerHTML = "";
+            
+            const cursorSpan = document.createElement('span');
+            cursorSpan.classList.add('cursor');
+            element.appendChild(cursorSpan);
+
+            function type() {
+                if (i < text.length) {
+                    if (text.charAt(i) === '\n') {
+                        cursorSpan.insertAdjacentHTML('beforebegin', '<br>');
+                    } else {
+                        cursorSpan.insertAdjacentHTML('beforebegin', text.charAt(i));
+                    }
+                    i++;
+                    setTimeout(type, speed);
+                } else {
+                    cursorSpan.remove();
+                    if(callback) callback();
+                }
+            }
+            type();
+        }
+
+        function startTypingEffect() {
+            typeWriter("typing-name", nameText, 70, () => {
+                typeWriter("typing-bio", bioText, 45, null);
+            });
+        }
+
+
+        // --- [5] كود فتح وإغلاق قائمة الثلاث شرط ---
+        const menuToggle = document.getElementById('menuToggle');
+        const socialLinks = document.getElementById('socialLinks');
+        const menuIcon = document.getElementById('menuIcon');
+
+        menuToggle.addEventListener('click', () => {
+            socialLinks.classList.toggle('open');
+            if (socialLinks.classList.contains('open')) {
+                menuIcon.className = 'fas fa-times';
+            } else {
+                menuIcon.className = 'fas fa-bars';
+            }
+        });
+
+
+        // --- [6] كود تبديل الوضع الليلي والنهاري ---
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'light') {
+                document.documentElement.removeAttribute('data-theme');
+                themeIcon.className = 'fas fa-moon';
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                themeIcon.className = 'fas fa-sun';
+            }
+        });
+
+
+        // --- [7] كود تشغيل وإيقاف الموسيقى الخلفية ---
+        const musicToggle = document.getElementById('musicToggle');
+        let isPlaying = false;
+
+        musicToggle.addEventListener('click', () => {
+            if (isPlaying) {
+                bgMusic.pause();
+                musicToggle.innerHTML = '<i class="fas fa-music"></i>';
+                musicToggle.style.opacity = '0.6';
+            } else {
+                bgMusic.play().catch(error => {
+                    console.log("المتصفح يمنع التشغيل التلقائي.");
+                });
+                musicToggle.innerHTML = '<i class="fas fa-pause"></i>';
+                musicToggle.style.opacity = '1';
+            }
+            isPlaying = !isPlaying;
+        });
+
+
+        // --- [8] كود التكبير المنبثق للصورة ---
+        const openViewer = document.getElementById('openViewer');
+        const imageViewer = document.getElementById('imageViewer');
+        const closeViewer = document.getElementById('closeViewer');
+
+        openViewer.addEventListener('click', () => {
+            imageViewer.classList.add('active');
+        });
+
+        closeViewer.addEventListener('click', () => {
+            imageViewer.classList.remove('active');
+        });
+
+        imageViewer.addEventListener('click', (e) => {
+            if (e.target === imageViewer) {
+                imageViewer.classList.remove('active');
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', attachClickSounds);
+    </script>
+</body>
+</html>
